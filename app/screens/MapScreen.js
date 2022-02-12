@@ -21,7 +21,16 @@ function MapScreen() {
     Geocoder.from(searchText)
       .then((response) => {
         const { lat, lng } = response.results[0].geometry.location;
-        setRegion({ ...region, latitude: lat, longitude: lng });
+        const northeast = response.results[0].geometry.viewport.northeast;
+        const southwest = response.results[0].geometry.viewport.southwest;
+        const latitudeDelta = northeast.lat - southwest.lat;
+        const longitudeDelta = northeast.lng - southwest.lng;
+        setRegion({
+          latitude: lat,
+          longitude: lng,
+          latitudeDelta: latitudeDelta,
+          longitudeDelta: longitudeDelta,
+        });
       })
       .catch((error) => console.warn(error));
   };
