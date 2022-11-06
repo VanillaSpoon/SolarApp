@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:../node_modules/react-native-maps/ios/AirGoogleMaps">
+   </FileRef>
+   <FileRef
       location = "group:Solar.xcodeproj">
    </FileRef>
    <FileRef
