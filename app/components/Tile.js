@@ -6,15 +6,13 @@ import {
   Text,
   TouchableWithoutFeedback,
 } from "react-native";
-import { Dimensions } from "react-native";
 import colors from "../config/colors";
-const win = Dimensions.get("window");
 
 function Tile({ title, address, image, onPress }) {
   return (
     <TouchableWithoutFeedback onPress={onPress}>
       <View style={styles.tile}>
-        <View style={styles.image}>
+        <View>
           <Image style={styles.image} source={image} />
         </View>
         <View style={styles.detailsContainer}>
@@ -34,14 +32,10 @@ const styles = StyleSheet.create({
   tile: {
     borderRadius: 15,
     backgroundColor: colors.white,
-    marginBottom: 30,
+    marginBottom: 25,
     alignContent: "flex-end",
     overflow: "hidden",
     flexDirection: "row",
-  },
-  imageC: {
-    justifyContent: "flex-start",
-    flex: 1,
   },
   detailsContainer: {
     paddingBottom: 100,
