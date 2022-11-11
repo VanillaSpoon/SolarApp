@@ -6,7 +6,7 @@ function MapScreen() {
   return (
     <Screen>
       <MapView
-        //provider={PROVIDER_GOOGLE} Use GOOGLE MAPS however needs to be configured correctly.
+        provider={PROVIDER_GOOGLE}
         style={{ flex: 1 }}
         region={{
           latitude: 42.882004,
