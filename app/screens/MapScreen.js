@@ -8,9 +8,10 @@ function MapScreen() {
       <MapView
         provider={PROVIDER_GOOGLE}
         style={{ flex: 1 }}
+        mapType="hybrid"
         region={{
-          latitude: 42.882004,
-          longitude: 74.582748,
+          latitude: 33.46637,
+          longitude: -84.790878,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
