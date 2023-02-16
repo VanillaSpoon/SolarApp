@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, TextInput, Button, Text } from "react-native";
 import Screen from "../components/Screen";
-import MapView, { PROVIDER_GOOGLE, Marker } from "react-native-maps";
+import MapView, { PROVIDER_GOOGLE, Marker, Polygon } from "react-native-maps";
 import Geocoder from "react-native-geocoding";
 import haversine from "haversine";
 
@@ -85,6 +85,13 @@ function MapScreen() {
         {markers.map((marker, index) => (
           <Marker key={index} coordinate={marker} />
         ))}
+        {markers.length === 4 && (
+          <Polygon
+            coordinates={markers}
+            strokeColor="transparent"
+            fillColor="rgba(0, 0, 255, 0.5)"
+          />
+        )}
       </MapView>
       <Button title="Calculate Area" onPress={handleCalculateArea} />
       {area && (
