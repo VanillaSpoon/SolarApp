@@ -39,28 +39,29 @@ function MapScreen() {
   };
 
   const handleMapPress = (event) => {
-    const newMarkers = [...markers, event.nativeEvent.coordinate];
+    const { coordinate } = event.nativeEvent;
+    const newMarkers = [...markers, coordinate];
     setMarkers(newMarkers);
   };
 
   const handleCalculateArea = () => {
-    if (markers.length !== 4) {
-      alert("Please select 4 points on the map");
+    if (markers.length < 3) {
+      alert("Please select at least 3 points on the map");
       return;
     }
 
-    const [point1, point2, point3, point4] = markers;
-    const distance1 = haversine(point1, point2, { unit: "meter" });
-    const distance2 = haversine(point2, point3, { unit: "meter" });
-    const distance3 = haversine(point3, point4, { unit: "meter" });
-    const distance4 = haversine(point4, point1, { unit: "meter" });
-    const semiperimeter = (distance1 + distance2 + distance3 + distance4) / 2;
-    const area = Math.sqrt(
-      (semiperimeter - distance1) *
-        (semiperimeter - distance2) *
-        (semiperimeter - distance3) *
-        (semiperimeter - distance4)
-    );
+    let area = 0;
+    for (let i = 0; i < markers.length - 2; i++) {
+      const p1 = markers[i];
+      const p2 = markers[i + 1];
+      const p3 = markers[i + 2];
+      const a = haversine(p1, p2, { unit: "meter" });
+      const b = haversine(p2, p3, { unit: "meter" });
+      const c = haversine(p3, p1, { unit: "meter" });
+      const s = (a + b + c) / 2;
+      const triangleArea = Math.sqrt(s * (s - a) * (s - b) * (s - c));
+      area += triangleArea;
+    }
     setArea(area.toFixed(2));
   };
 
@@ -85,7 +86,7 @@ function MapScreen() {
         {markers.map((marker, index) => (
           <Marker key={index} coordinate={marker} />
         ))}
-        {markers.length === 4 && (
+        {markers.length >= 3 && (
           <Polygon
             coordinates={markers}
             strokeColor="transparent"
