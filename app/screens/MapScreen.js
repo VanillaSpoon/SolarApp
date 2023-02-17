@@ -92,7 +92,7 @@ function MapScreen() {
       area += triangleArea;
     }
     setArea(area.toFixed(2));
-    setMarkers(markers);
+    handleCalculateAverage();
   };
 
   return (
@@ -124,13 +124,12 @@ function MapScreen() {
           />
         )}
       </MapView>
-      <Button title="Calculate Area" onPress={handleCalculateArea} />
+      <Button title="Calculate" onPress={handleCalculateArea} />
       {area && (
         <View style={{ alignSelf: "center" }}>
           <Text>Area: {area} m²</Text>
         </View>
       )}
-      <Button title="Calculate Average" onPress={handleCalculateAverage} />
       {averageAltitude !== null && (
         <View style={{ alignSelf: "center" }}>
           <Text>Average altitude: {averageAltitude} meters</Text>
