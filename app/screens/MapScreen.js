@@ -4,6 +4,7 @@ import Screen from "../components/Screen";
 import MapView, { PROVIDER_GOOGLE, Marker, Polygon } from "react-native-maps";
 import Geocoder from "react-native-geocoding";
 import haversine from "haversine";
+import suncalc from "suncalc";
 
 function MapScreen() {
   const [searchText, setSearchText] = useState("");
@@ -16,6 +17,7 @@ function MapScreen() {
   const [markers, setMarkers] = useState([]);
   const [area, setArea] = useState(null);
   const [averageAltitude, setAverageAltitude] = useState(null);
+  const [averageSunExposure, setAverageSunExposure] = useState(null);
 
   useEffect(() => {
     Geocoder.init("AIzaSyBIcIDCgseIHKADEEOzCrfV1ku927QlpV4");
@@ -55,12 +57,19 @@ function MapScreen() {
       coordinate.latitude,
       coordinate.longitude
     );
+    const sunTimes = suncalc.getTimes(
+      new Date(),
+      coordinate.latitude,
+      coordinate.longitude
+    );
+    const sunExposure = sunTimes.sunset - sunTimes.sunrise;
     const newMarkers = [
       ...markers,
       {
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
         altitude: altitude,
+        sunExposure: sunExposure,
       },
     ];
     setMarkers(newMarkers);
@@ -70,6 +79,13 @@ function MapScreen() {
     const sumAltitude = markers.reduce((acc, curr) => acc + curr.altitude, 0);
     const avgAltitude = sumAltitude / markers.length;
     setAverageAltitude(avgAltitude.toFixed(2));
+
+    const sumSunExposure = markers.reduce(
+      (acc, curr) => acc + curr.sunExposure,
+      0
+    );
+    const avgSunExposure = sumSunExposure / markers.length;
+    setAverageSunExposure(avgSunExposure.toFixed(2));
   };
 
   const handleCalculateArea = () => {
@@ -133,6 +149,11 @@ function MapScreen() {
       {averageAltitude !== null && (
         <View style={{ alignSelf: "center" }}>
           <Text>Average altitude: {averageAltitude} meters</Text>
+        </View>
+      )}
+      {averageSunExposure !== null && (
+        <View style={{ alignSelf: "center" }}>
+          <Text>Average sun exposure: {averageSunExposure} seconds</Text>
         </View>
       )}
     </Screen>
