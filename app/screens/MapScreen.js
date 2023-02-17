@@ -15,6 +15,7 @@ function MapScreen() {
   });
   const [markers, setMarkers] = useState([]);
   const [area, setArea] = useState(null);
+  const [averageAltitude, setAverageAltitude] = useState(null);
 
   useEffect(() => {
     Geocoder.init("AIzaSyBIcIDCgseIHKADEEOzCrfV1ku927QlpV4");
@@ -38,10 +39,37 @@ function MapScreen() {
       .catch((error) => console.warn(error));
   };
 
-  const handleMapPress = (event) => {
+  const getElevation = async (latitude, longitude) => {
+    const url = `https://maps.googleapis.com/maps/api/elevation/json?locations=${latitude},${longitude}&key=${"AIzaSyBIcIDCgseIHKADEEOzCrfV1ku927QlpV4"}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if (data.results.length > 0) {
+      return data.results[0].elevation;
+    }
+    return null;
+  };
+
+  const handleMapPress = async (event) => {
     const { coordinate } = event.nativeEvent;
-    const newMarkers = [...markers, coordinate];
+    const altitude = await getElevation(
+      coordinate.latitude,
+      coordinate.longitude
+    );
+    const newMarkers = [
+      ...markers,
+      {
+        latitude: coordinate.latitude,
+        longitude: coordinate.longitude,
+        altitude: altitude,
+      },
+    ];
     setMarkers(newMarkers);
+  };
+
+  const handleCalculateAverage = () => {
+    const sumAltitude = markers.reduce((acc, curr) => acc + curr.altitude, 0);
+    const avgAltitude = sumAltitude / markers.length;
+    setAverageAltitude(avgAltitude.toFixed(2));
   };
 
   const handleCalculateArea = () => {
@@ -51,6 +79,7 @@ function MapScreen() {
     }
 
     let area = 0;
+
     for (let i = 0; i < markers.length - 2; i++) {
       const p1 = markers[i];
       const p2 = markers[i + 1];
@@ -63,6 +92,7 @@ function MapScreen() {
       area += triangleArea;
     }
     setArea(area.toFixed(2));
+    setMarkers(markers);
   };
 
   return (
@@ -84,7 +114,7 @@ function MapScreen() {
         onPress={handleMapPress}
       >
         {markers.map((marker, index) => (
-          <Marker key={index} coordinate={marker} />
+          <Marker key={index} coordinate={marker}></Marker>
         ))}
         {markers.length >= 3 && (
           <Polygon
@@ -96,7 +126,15 @@ function MapScreen() {
       </MapView>
       <Button title="Calculate Area" onPress={handleCalculateArea} />
       {area && (
-        <Text style={{ alignSelf: "center" }}>Area: {area} square meters</Text>
+        <View style={{ alignSelf: "center" }}>
+          <Text>Area: {area} m²</Text>
+        </View>
+      )}
+      <Button title="Calculate Average" onPress={handleCalculateAverage} />
+      {averageAltitude !== null && (
+        <View style={{ alignSelf: "center" }}>
+          <Text>Average altitude: {averageAltitude} meters</Text>
+        </View>
       )}
     </Screen>
   );
