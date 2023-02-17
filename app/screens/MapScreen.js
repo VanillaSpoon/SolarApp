@@ -23,6 +23,7 @@ function MapScreen() {
     Geocoder.init("AIzaSyBIcIDCgseIHKADEEOzCrfV1ku927QlpV4");
   }, []);
 
+  // converting the search  to latitude and longitude coordinates using the Geocoder API
   const handleSearch = () => {
     Geocoder.from(searchText)
       .then((response) => {
@@ -41,6 +42,7 @@ function MapScreen() {
       .catch((error) => console.warn(error));
   };
 
+  // get the elevation of a given latitude and longitude using the Google Elevation API
   const getElevation = async (latitude, longitude) => {
     const url = `https://maps.googleapis.com/maps/api/elevation/json?locations=${latitude},${longitude}&key=${"AIzaSyBIcIDCgseIHKADEEOzCrfV1ku927QlpV4"}`;
     const response = await fetch(url);
@@ -51,43 +53,59 @@ function MapScreen() {
     return null;
   };
 
+  // adding a marker to the map when the user presses on it, and calculate markers altitude and sun exposure
   const handleMapPress = async (event) => {
-    const { coordinate } = event.nativeEvent;
+    const { coordinate } = event.nativeEvent; //gets the coordinates of the pressed location
     const altitude = await getElevation(
+      // gets the altitude of the pressed location
       coordinate.latitude,
       coordinate.longitude
     );
+    // calculate the sunrise and sunset times for the point using the suncalc library
     const sunTimes = suncalc.getTimes(
       new Date(),
       coordinate.latitude,
       coordinate.longitude
     );
-    const sunExposure = sunTimes.sunset - sunTimes.sunrise;
+    const sunrise = sunTimes.sunrise.getTime(); // in milliseconds
+    const sunset = sunTimes.sunset.getTime();
+    const sunExposures = [];
+    for (let i = 0; i < 365; i++) {
+      // calculate the sun exposure for each day of the year
+      const newSunrise = new Date(sunrise + i * 24 * 60 * 60 * 1000); // add 24 hours to the sunrise time
+      const newSunset = new Date(sunset + i * 24 * 60 * 60 * 1000);
+      const newSunExposure = ((newSunset - newSunrise) / 86400000) * 86400; // in seconds
+      sunExposures.push(newSunExposure);
+    }
+    const avgSunExposure365 = sunExposures.reduce((acc, curr) => acc + curr, 0); // calculate the average sun exposure for the year
     const newMarkers = [
       ...markers,
       {
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
         altitude: altitude,
-        sunExposure: sunExposure,
+        sunExposure: avgSunExposure365,
       },
     ];
     setMarkers(newMarkers);
   };
 
+  // calculate the average altitude and sun exposure of all markers
   const handleCalculateAverage = () => {
-    const sumAltitude = markers.reduce((acc, curr) => acc + curr.altitude, 0);
+    const sumAltitude = markers.reduce((acc, curr) => acc + curr.altitude, 0); // sum of altitudes
     const avgAltitude = sumAltitude / markers.length;
     setAverageAltitude(avgAltitude.toFixed(2));
 
-    const sumSunExposure = markers.reduce(
+    const sumSunExposure365 = markers.reduce(
+      // sum of sun exposures
       (acc, curr) => acc + curr.sunExposure,
       0
     );
-    const avgSunExposure = sumSunExposure / markers.length;
-    setAverageSunExposure(avgSunExposure.toFixed(2));
+    const avgSunExposure365 = sumSunExposure365 / markers.length;
+    setAverageSunExposure(avgSunExposure365.toFixed(2));
   };
 
+  // calculate the area enclosed by the markers
   const handleCalculateArea = () => {
     if (markers.length < 3) {
       alert("Please select at least 3 points on the map");
@@ -96,17 +114,19 @@ function MapScreen() {
 
     let area = 0;
 
+    // Loop through the markers and calculate the area of each triangle formed by three consecutive markers
     for (let i = 0; i < markers.length - 2; i++) {
       const p1 = markers[i];
       const p2 = markers[i + 1];
       const p3 = markers[i + 2];
-      const a = haversine(p1, p2, { unit: "meter" });
+      const a = haversine(p1, p2, { unit: "meter" }); // Length of side a using haversine formula
       const b = haversine(p2, p3, { unit: "meter" });
       const c = haversine(p3, p1, { unit: "meter" });
-      const s = (a + b + c) / 2;
-      const triangleArea = Math.sqrt(s * (s - a) * (s - b) * (s - c));
-      area += triangleArea;
+      const s = (a + b + c) / 2; // Semi-perimeter of the triangle
+      const triangleArea = Math.sqrt(s * (s - a) * (s - b) * (s - c)); // Area of the triangle using Heron's formula
+      area += triangleArea; // add to total area
     }
+
     setArea(area.toFixed(2));
     handleCalculateAverage();
   };
