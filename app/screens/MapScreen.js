@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { View, TextInput, Button, Text } from "react-native";
+import { View, TextInput, Button, Text, TouchableOpacity } from "react-native";
 import Screen from "../components/Screen";
+import ResultsScreen from "./ResultsScreen";
 import MapView, { PROVIDER_GOOGLE, Marker, Polygon } from "react-native-maps";
 import Geocoder from "react-native-geocoding";
 import haversine from "haversine";
 import suncalc from "suncalc";
+import { useNavigation } from "@react-navigation/native";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 function MapScreen() {
+  const navigation = useNavigation();
+
   const [searchText, setSearchText] = useState("");
   const [region, setRegion] = useState({
     latitude: 33.46637,
@@ -103,6 +108,12 @@ function MapScreen() {
     );
     const avgSunExposure365 = sumSunExposure365 / markers.length;
     setAverageSunExposure(avgSunExposure365.toFixed(2));
+    navigation.navigate("ResultsScreen", {
+      markers: markers,
+      area: area,
+      averageAltitude: avgAltitude,
+      averageSunExposure: avgSunExposure365,
+    });
   };
 
   // calculate the area enclosed by the markers
