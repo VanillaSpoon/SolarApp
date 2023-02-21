@@ -1,9 +1,10 @@
 import React from "react";
-import { FlatList, StyleSheet } from "react-native";
+import { FlatList, StyleSheet, Button } from "react-native";
 
 import Tile from "../components/Tile";
 import colors from "../config/colors";
 import Screen from "../components/Screen";
+import { useNavigation } from "@react-navigation/native";
 
 const scanned = [
   {
@@ -27,6 +28,10 @@ const scanned = [
 ];
 
 function ScannedScreen() {
+  const navigation = useNavigation();
+  const handleNavigation = () => {
+    navigation.navigate("Solar");
+  };
   return (
     <Screen style={styles.screen}>
       <FlatList
@@ -38,6 +43,7 @@ function ScannedScreen() {
           <Tile title={item.title} address={item.address} image={item.image} />
         )}
       />
+      <Button title="New Property" onPress={handleNavigation} />
     </Screen>
   );
 }

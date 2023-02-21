@@ -17,8 +17,8 @@ export default class App extends React.Component {
     return (
       <NavigationContainer>
         <Stack.Navigator>
-          <Stack.Screen name="Solar" component={MapScreen} />
           <Stack.Screen name="Scanned" component={ScannedScreen} />
+          <Stack.Screen name="Solar" component={MapScreen} />
           <Stack.Screen name="ResultsScreen" component={ResultsScreen} />
         </Stack.Navigator>
       </NavigationContainer>
