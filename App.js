@@ -9,6 +9,7 @@ import SidebarScreen from "./app/screens/SidebarScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import ResultsScreen from "./app/screens/ResultsScreen";
+import PropertyScreen from "./app/screens/PropertyScreen";
 
 const Stack = createStackNavigator();
 
@@ -18,6 +19,7 @@ export default class App extends React.Component {
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Screen name="Scanned" component={ScannedScreen} />
+          <Stack.Screen name="Property" component={PropertyScreen} />
           <Stack.Screen name="Solar" component={MapScreen} />
           <Stack.Screen name="ResultsScreen" component={ResultsScreen} />
         </Stack.Navigator>

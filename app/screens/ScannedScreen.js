@@ -40,7 +40,12 @@ function ScannedScreen() {
         data={scanned}
         keyExtractor={(scanned) => scanned.id.toString()}
         renderItem={({ item }) => (
-          <Tile title={item.title} address={item.address} image={item.image} />
+          <Tile
+            title={item.title}
+            address={item.address}
+            image={item.image}
+            onPress={() => navigation.navigate("Property")}
+          />
         )}
       />
       <Button title="New Property" onPress={handleNavigation} />
