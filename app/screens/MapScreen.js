@@ -108,7 +108,7 @@ function MapScreen() {
     );
     const avgSunExposure365 = sumSunExposure365 / markers.length;
     setAverageSunExposure(avgSunExposure365.toFixed(2));
-    navigation.navigate("ResultsScreen", {
+    navigation.navigate("Results", {
       markers: markers,
       area: area,
       averageAltitude: avgAltitude,

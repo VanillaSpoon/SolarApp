@@ -19,9 +19,9 @@ export default class App extends React.Component {
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Screen name="Scanned" component={ScannedScreen} />
-          <Stack.Screen name="Property" component={PropertyScreen} />
           <Stack.Screen name="Solar" component={MapScreen} />
-          <Stack.Screen name="ResultsScreen" component={ResultsScreen} />
+          <Stack.Screen name="Results" component={ResultsScreen} />
+          <Stack.Screen name="Property" component={PropertyScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     );

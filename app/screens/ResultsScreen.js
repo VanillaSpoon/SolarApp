@@ -1,9 +1,29 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, Button } from "react-native";
 import Screen from "../components/Screen";
-const ResultsScreen = ({ route }) => {
-  const { markers, area, averageAltitude, averageSunExposure } = route.params;
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import flatted from "flatted";
+import { useNavigation } from "@react-navigation/native";
 
+const ResultsScreen = ({ route }) => {
+  const navigation = useNavigation();
+
+  const { markers, area, averageAltitude, averageSunExposure } = route.params;
+  const saveInfo = async (
+    markers,
+    area,
+    averageAltitude,
+    averageSunExposure
+  ) => {
+    try {
+      const data = { markers, area, averageAltitude, averageSunExposure };
+      const dataString = flatted.stringify(data);
+      await AsyncStorage.setItem("propertyData", dataString);
+      navigation.navigate("Scanned");
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
     <Screen style={{ flex: 1, alignItems: "center" }}>
       <Text>Markers:</Text>
@@ -39,6 +59,13 @@ const ResultsScreen = ({ route }) => {
       {averageSunExposure !== null && (
         <Text>Average sun exposure: {averageSunExposure} seconds</Text>
       )}
+
+      <Button
+        title="Save"
+        onPress={() =>
+          saveInfo(markers, area, averageAltitude, averageSunExposure)
+        }
+      />
     </Screen>
   );
 };
