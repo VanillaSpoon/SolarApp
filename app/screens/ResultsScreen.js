@@ -9,21 +9,30 @@ const ResultsScreen = ({ route }) => {
   const navigation = useNavigation();
 
   const { markers, area, averageAltitude, averageSunExposure } = route.params;
+
   const saveInfo = async (
     markers,
     area,
     averageAltitude,
-    averageSunExposure
+    averageSunExposure,
+    properties
   ) => {
     try {
-      const data = { markers, area, averageAltitude, averageSunExposure };
-      const dataString = flatted.stringify(data);
-      await AsyncStorage.setItem("propertyData", dataString);
+      const newProperty = {
+        markers,
+        area,
+        averageAltitude,
+        averageSunExposure,
+      };
+      const newProperties = [...properties, newProperty];
+      const data = flatted.stringify(newProperties);
+      await AsyncStorage.setItem("properties", data);
       navigation.navigate("Scanned");
     } catch (error) {
       console.error(error);
     }
   };
+
   return (
     <Screen style={{ flex: 1, alignItems: "center" }}>
       <Text>Markers:</Text>
@@ -62,9 +71,17 @@ const ResultsScreen = ({ route }) => {
 
       <Button
         title="Save"
-        onPress={() =>
-          saveInfo(markers, area, averageAltitude, averageSunExposure)
-        }
+        onPress={async () => {
+          const data = await AsyncStorage.getItem("properties");
+          const properties = data ? flatted.parse(data) : [];
+          saveInfo(
+            markers,
+            area,
+            averageAltitude,
+            averageSunExposure,
+            properties
+          );
+        }}
       />
     </Screen>
   );
