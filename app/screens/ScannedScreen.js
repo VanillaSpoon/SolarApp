@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FlatList, StyleSheet, Button, Alert } from "react-native";
+import { FlatList, StyleSheet, Button, Alert, Image } from "react-native";
 
 import Tile from "../components/Tile";
 import colors from "../config/colors";
@@ -53,6 +53,12 @@ function ScannedScreen() {
 
   return (
     <Screen style={styles.screen}>
+      {properties.length > 0 && (
+        <Button
+          title="Remove All Properties"
+          onPress={confirmRemoveAllProperties}
+        />
+      )}
       {properties.length > 0 ? (
         <FlatList
           showsHorizontalScrollIndicator={false}
@@ -76,15 +82,12 @@ function ScannedScreen() {
           )}
         />
       ) : (
-        <Tile title="No properties saved" />
-      )}
-      <Button title="New Property" onPress={handleNavigation} />
-      {properties.length > 0 && (
-        <Button
-          title="Remove All Properties"
-          onPress={confirmRemoveAllProperties}
+        <Image
+          style={{ width: "100%", height: "50%" }}
+          source={require("../assets/images/houseNB.png")}
         />
       )}
+      <Button title="New Property" onPress={handleNavigation} />
     </Screen>
   );
 }
