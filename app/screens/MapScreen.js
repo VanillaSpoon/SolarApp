@@ -7,7 +7,6 @@ import Geocoder from "react-native-geocoding";
 import haversine from "haversine";
 import suncalc from "suncalc";
 import { useNavigation } from "@react-navigation/native";
-import Icon from "react-native-vector-icons/FontAwesome";
 
 function MapScreen() {
   const navigation = useNavigation();
@@ -97,22 +96,29 @@ function MapScreen() {
 
   // calculate the average altitude and sun exposure of all markers
   const handleCalculateAverage = () => {
-    const sumAltitude = markers.reduce((acc, curr) => acc + curr.altitude, 0); // sum of altitudes
+    const sumAltitude = markers.reduce((acc, curr) => acc + curr.altitude, 0);
     const avgAltitude = sumAltitude / markers.length;
     setAverageAltitude(avgAltitude.toFixed(2));
 
     const sumSunExposure365 = markers.reduce(
-      // sum of sun exposures
       (acc, curr) => acc + curr.sunExposure,
       0
     );
     const avgSunExposure365 = sumSunExposure365 / markers.length;
     setAverageSunExposure(avgSunExposure365.toFixed(2));
+
+    const solarIrradiance =
+      (avgSunExposure365 / 365 / 86400) * (1 - avgAltitude / 1000);
+
+    const efficiency = 0.2; // assume a solar panel efficiency of 15%
+    const powerOutput = solarIrradiance * area * efficiency;
+    const energyOutput = powerOutput * 365;
     navigation.navigate("Results", {
       markers: markers,
       area: area,
-      averageAltitude: avgAltitude,
-      averageSunExposure: avgSunExposure365,
+      averageAltitude: averageAltitude,
+      averageSunExposure: averageSunExposure,
+      energyOutput: energyOutput.toFixed(2),
     });
   };
 
@@ -137,7 +143,6 @@ function MapScreen() {
       const triangleArea = Math.sqrt(s * (s - a) * (s - b) * (s - c)); // Area of the triangle using Heron's formula
       area += triangleArea; // add to total area
     }
-
     setArea(area.toFixed(2));
     handleCalculateAverage();
   };

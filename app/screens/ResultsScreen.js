@@ -8,13 +8,15 @@ import { useNavigation } from "@react-navigation/native";
 const ResultsScreen = ({ route }) => {
   const navigation = useNavigation();
 
-  const { markers, area, averageAltitude, averageSunExposure } = route.params;
+  const { markers, area, averageAltitude, averageSunExposure, energyOutput } =
+    route.params;
 
   const saveInfo = async (
     markers,
     area,
     averageAltitude,
     averageSunExposure,
+    energyOutput,
     properties
   ) => {
     try {
@@ -66,7 +68,10 @@ const ResultsScreen = ({ route }) => {
         <Text>Average altitude: {averageAltitude} meters</Text>
       )}
       {averageSunExposure !== null && (
-        <Text>Average sun exposure: {averageSunExposure} seconds</Text>
+        <Text>Average sun exposure: {averageSunExposure} W/m²</Text>
+      )}
+      {energyOutput !== null && (
+        <Text>Average energyOutput: {energyOutput} KWh</Text>
       )}
 
       <Button
