@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { View, TextInput, Button, Text, TouchableOpacity } from "react-native";
+import { View, TextInput, Button } from "react-native";
 import Screen from "../components/Screen";
-import ResultsScreen from "./ResultsScreen";
 import MapView, { PROVIDER_GOOGLE, Marker, Polygon } from "react-native-maps";
 import Geocoder from "react-native-geocoding";
 import haversine from "haversine";
@@ -28,8 +27,43 @@ function MapScreen() {
     Geocoder.init("AIzaSyBIcIDCgseIHKADEEOzCrfV1ku927QlpV4");
   }, []);
 
-  // converting the search  to latitude and longitude coordinates using the Geocoder API
   const handleSearch = () => {
+    convertSearchToCoords();
+  };
+
+  const getElevation = async (latitude, longitude) => {
+    return await fetchElevation(latitude, longitude);
+  };
+
+  const handleMapPress = async (event) => {
+    await addMarker(event);
+  };
+
+  const handleNext = async () => {
+    await handleCalculations();
+    navigateToResults();
+  };
+
+  const handleCalculations = () => {
+    return new Promise((resolve) => {
+      if (markers.length < 3) {
+        alert("Please select at least 3 points on the map");
+        return;
+      }
+
+      calculateArea();
+
+      resolve();
+    });
+  };
+
+  useEffect(() => {
+    if (averageAltitude !== null && averageSunExposure !== null) {
+      calculateAndSetPowerOutput();
+    }
+  }, [averageAltitude, averageSunExposure]);
+
+  const convertSearchToCoords = () => {
     Geocoder.from(searchText)
       .then((response) => {
         const { lat, lng } = response.results[0].geometry.location;
@@ -47,8 +81,8 @@ function MapScreen() {
       .catch((error) => console.warn(error));
   };
 
-  // get the elevation of a given latitude and longitude using the Google Elevation API
-  const getElevation = async (latitude, longitude) => {
+  // fetch the elevation of a given latitude and longitude using the Google Elevation API
+  const fetchElevation = async (latitude, longitude) => {
     const url = `https://maps.googleapis.com/maps/api/elevation/json?locations=${latitude},${longitude}&key=${"AIzaSyBIcIDCgseIHKADEEOzCrfV1ku927QlpV4"}`;
     const response = await fetch(url);
     const data = await response.json();
@@ -59,30 +93,18 @@ function MapScreen() {
   };
 
   // adding a marker to the map when the user presses on it, and calculate markers altitude and sun exposure
-  const handleMapPress = async (event) => {
-    const { coordinate } = event.nativeEvent; //gets the coordinates of the pressed location
+  const addMarker = async (event) => {
+    const { coordinate } = event.nativeEvent;
     const altitude = await getElevation(
       // gets the altitude of the pressed location
       coordinate.latitude,
       coordinate.longitude
     );
-    // calculate the sunrise and sunset times for the point using the suncalc library
-    const sunTimes = suncalc.getTimes(
-      new Date(),
+    const avgSunExposure365 = calculateAvgSunExposure365(
       coordinate.latitude,
       coordinate.longitude
     );
-    const sunrise = sunTimes.sunrise.getTime(); // in milliseconds
-    const sunset = sunTimes.sunset.getTime();
-    const sunExposures = [];
-    for (let i = 0; i < 365; i++) {
-      // calculate the sun exposure for each day of the year
-      const newSunrise = new Date(sunrise + i * 24 * 60 * 60 * 1000); // add 24 hours to the sunrise time
-      const newSunset = new Date(sunset + i * 24 * 60 * 60 * 1000);
-      const newSunExposure = ((newSunset - newSunrise) / 86400000) * 86400; // in seconds
-      sunExposures.push(newSunExposure);
-    }
-    const avgSunExposure365 = sunExposures.reduce((acc, curr) => acc + curr, 0); // calculate the average sun exposure for the year
+
     const newMarkers = [
       ...markers,
       {
@@ -95,8 +117,26 @@ function MapScreen() {
     setMarkers(newMarkers);
   };
 
+  // calculate the sunrise and sunset times for the point using the suncalc library
+  const calculateAvgSunExposure365 = (latitude, longitude) => {
+    const sunTimes = suncalc.getTimes(new Date(), latitude, longitude);
+    const sunrise = sunTimes.sunrise.getTime();
+    const sunset = sunTimes.sunset.getTime();
+    const sunExposures = [];
+
+    for (let i = 0; i < 365; i++) {
+      // calculate the sun exposure for each day of the year
+      const newSunrise = new Date(sunrise + i * 24 * 60 * 60 * 1000); // add 24 hours to the sunrise time
+      const newSunset = new Date(sunset + i * 24 * 60 * 60 * 1000);
+      const newSunExposure = ((newSunset - newSunrise) / 86400000) * 86400; // in seconds
+      sunExposures.push(newSunExposure);
+    }
+
+    return sunExposures.reduce((acc, curr) => acc + curr, 0); // calculate the average sun exposure for the year
+  };
+
   // calculate the average altitude and sun exposure of all markers
-  const handleCalculateAverage = () => {
+  const calculateAndSetAltitudeAndSunExposure = () => {
     const sumAltitude = markers.reduce((acc, curr) => acc + curr.altitude, 0);
     const avgAltitude = sumAltitude / markers.length;
     setAverageAltitude(avgAltitude.toFixed(2));
@@ -107,16 +147,21 @@ function MapScreen() {
     );
     const avgSunExposure365 = sumSunExposure365 / markers.length;
     setAverageSunExposure(avgSunExposure365.toFixed(2));
+  };
+
+  const calculateAndSetPowerOutput = () => {
+    const avgAltitude = parseFloat(averageAltitude);
+    const avgSunExposure365 = parseFloat(averageSunExposure);
 
     const solarIrradiance =
       (avgSunExposure365 / 365 / 86400) * (1 - avgAltitude / 1000);
 
-    const efficiency = 0.2; // assume a solar panel efficiency of 15%
+    const efficiency = 0.2;
     const powerOutput = solarIrradiance * area * efficiency;
     setEnergyOutput((powerOutput * 365).toFixed(2));
   };
 
-  const handleNext = () => {
+  const navigateToResults = () => {
     navigation.navigate("Results", {
       markers,
       area,
@@ -127,13 +172,7 @@ function MapScreen() {
     });
   };
 
-  // calculate the area enclosed by the markers
-  const handleCalculateArea = () => {
-    if (markers.length < 3) {
-      alert("Please select at least 3 points on the map");
-      return;
-    }
-
+  const calculateArea = () => {
     let area = 0;
 
     // Loop through the markers and calculate the area of each triangle formed by three consecutive markers
@@ -149,7 +188,7 @@ function MapScreen() {
       area += triangleArea; // add to total area
     }
     setArea(area.toFixed(2));
-    handleCalculateAverage();
+    calculateAndSetAltitudeAndSunExposure();
   };
 
   return (
@@ -181,8 +220,12 @@ function MapScreen() {
           />
         )}
       </MapView>
-      <Button title="Calculate" onPress={handleCalculateArea} />
-      <Button title="Next" onPress={handleNext} />
+      <Button title="Calculate" onPress={handleCalculations} />
+      <Button
+        title="Next"
+        onPress={handleNext}
+        disabled={energyOutput === null}
+      />
     </Screen>
   );
 }

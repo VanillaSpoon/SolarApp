@@ -77,6 +77,7 @@ function ScannedScreen() {
                   averageSunExposure: item.averageSunExposure,
                   propertyId: properties.indexOf(item),
                   energyOutput: item.energyOutput,
+                  searchText: item.searchText,
                 })
               }
             />

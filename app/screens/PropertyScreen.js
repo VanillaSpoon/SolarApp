@@ -1,21 +1,41 @@
 import React from "react";
 import { View, Text, Button } from "react-native";
 import Screen from "../components/Screen";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import flatted from "flatted";
 import { useNavigation } from "@react-navigation/native";
 
 const PropertyScreen = ({ route }) => {
-  const navigation = useNavigation();
-
-  const { markers, area, averageAltitude, averageSunExposure, energyOutput } =
-    route.params;
+  const {
+    markers,
+    averageAltitude,
+    averageSunExposure,
+    energyOutput,
+    searchText,
+  } = route.params;
   console.log("energyOutput:", energyOutput);
   console.log(route.params);
 
   return (
     <Screen style={{ flex: 1, alignItems: "center" }}>
-      <Text>Markers:</Text>
+      <View style={{ alignItems: "stretch", marginTop: 15 }}>
+        {searchText !== null && (
+          <Text>
+            <Text style={{ fontWeight: "bold" }}>Address:</Text> {searchText}{" "}
+          </Text>
+        )}
+        {averageAltitude !== null && (
+          <Text>
+            <Text style={{ fontWeight: "bold" }}>Average Altitude:</Text>{" "}
+            {averageAltitude} meters
+          </Text>
+        )}
+        {averageSunExposure !== null && (
+          <Text style={{ marginBottom: 50 }}>
+            <Text style={{ fontWeight: "bold" }}>Average Sun Exposure:</Text>{" "}
+            {averageSunExposure} W/m²
+          </Text>
+        )}
+      </View>
+
       <View
         style={{
           flexDirection: "row",
@@ -41,27 +61,39 @@ const PropertyScreen = ({ route }) => {
           <Text style={{ flex: 1 }}>{marker.latitude}</Text>
         </View>
       ))}
-      {area !== null && <Text>Area: {area} m²</Text>}
-      {averageAltitude !== null && (
-        <Text>
-          <Text style={{ fontWeight: "bold" }}>Average Altitude:</Text>{" "}
-          {averageAltitude} meters
-        </Text>
-      )}
-      {averageSunExposure !== null && (
-        <Text style={{ marginBottom: 50 }}>
-          <Text style={{ fontWeight: "bold" }}>Average Sun Exposure:</Text>{" "}
-          {averageSunExposure} W/m²
-        </Text>
-      )}
       {energyOutput !== null && (
-        <Text style={{ fontSize: 18 }}>
-          <Text style={{ fontWeight: "bold" }}>
-            Annual Energy Production Estimation:
-          </Text>{" "}
-          {energyOutput} kWh
-        </Text>
+        <View
+          style={{
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 10,
+            marginTop: 50,
+          }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 15 }}>
+            Annual Energy Production Estimation
+          </Text>
+          <Text style={{ fontSize: 18, alignContent: "center" }}>
+            {energyOutput} kWh
+          </Text>
+        </View>
       )}
+      <Button
+        title="Save"
+        onPress={async () => {
+          const data = await AsyncStorage.getItem("properties");
+          const properties = data ? flatted.parse(data) : [];
+          saveInfo(
+            markers,
+            area,
+            averageAltitude,
+            averageSunExposure,
+            energyOutput,
+            searchText,
+            properties
+          );
+        }}
+      />
     </Screen>
   );
 };

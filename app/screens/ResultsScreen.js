@@ -8,8 +8,14 @@ import { useNavigation } from "@react-navigation/native";
 const ResultsScreen = ({ route }) => {
   const navigation = useNavigation();
 
-  const { markers, area, averageAltitude, averageSunExposure, energyOutput } =
-    route.params;
+  const {
+    markers,
+    area,
+    averageAltitude,
+    averageSunExposure,
+    energyOutput,
+    searchText,
+  } = route.params;
 
   const saveInfo = async (
     markers,
@@ -17,6 +23,7 @@ const ResultsScreen = ({ route }) => {
     averageAltitude,
     averageSunExposure,
     energyOutput,
+    searchText,
     properties
   ) => {
     try {
@@ -26,6 +33,7 @@ const ResultsScreen = ({ route }) => {
         averageAltitude,
         averageSunExposure,
         energyOutput,
+        searchText,
       };
       const newProperties = [...properties, newProperty];
       const data = flatted.stringify(newProperties);
@@ -38,7 +46,26 @@ const ResultsScreen = ({ route }) => {
 
   return (
     <Screen style={{ flex: 1, alignItems: "center" }}>
-      <Text>Markers:</Text>
+      <View style={{ alignItems: "stretch", marginTop: 15 }}>
+        {searchText !== null && (
+          <Text>
+            <Text style={{ fontWeight: "bold" }}>Address:</Text> {searchText}{" "}
+          </Text>
+        )}
+        {averageAltitude !== null && (
+          <Text>
+            <Text style={{ fontWeight: "bold" }}>Average Altitude:</Text>{" "}
+            {averageAltitude} meters
+          </Text>
+        )}
+        {averageSunExposure !== null && (
+          <Text style={{ marginBottom: 50 }}>
+            <Text style={{ fontWeight: "bold" }}>Average Sun Exposure:</Text>{" "}
+            {averageSunExposure} W/m²
+          </Text>
+        )}
+      </View>
+
       <View
         style={{
           flexDirection: "row",
@@ -64,17 +91,23 @@ const ResultsScreen = ({ route }) => {
           <Text style={{ flex: 1 }}>{marker.latitude}</Text>
         </View>
       ))}
-      {area !== null && <Text>Area: {area} m²</Text>}
-      {averageAltitude !== null && (
-        <Text>Average altitude: {averageAltitude} meters</Text>
-      )}
-      {averageSunExposure !== null && (
-        <Text>Average sun exposure: {averageSunExposure} W/m²</Text>
-      )}
       {energyOutput !== null && (
-        <Text>Average energyOutput: {energyOutput} KWh</Text>
+        <View
+          style={{
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 10,
+            marginTop: 50,
+          }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 15 }}>
+            Annual Energy Production Estimation
+          </Text>
+          <Text style={{ fontSize: 18, alignContent: "center" }}>
+            {energyOutput} kWh
+          </Text>
+        </View>
       )}
-
       <Button
         title="Save"
         onPress={async () => {
@@ -86,6 +119,7 @@ const ResultsScreen = ({ route }) => {
             averageAltitude,
             averageSunExposure,
             energyOutput,
+            searchText,
             properties
           );
         }}
