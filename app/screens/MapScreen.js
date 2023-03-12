@@ -5,6 +5,11 @@ import MapView, { PROVIDER_GOOGLE, Marker, Polygon } from "react-native-maps";
 import Geocoder from "react-native-geocoding";
 import haversine from "haversine";
 import suncalc from "suncalc";
+import { convertSearchToCoords } from "../calculations/convertSearchToCoOrds";
+import { fetchElevation } from "../calculations/fetchElevation";
+import { addMarker } from "../calculations/addMarker";
+import { calculateAvgSunExposure365 } from "../calculations/calculateAvgSunExposure365";
+import { calculateAndSetAltitudeAndSunExposure } from "../calculations/calculateAndSetAltitudeAndSunExposure";
 import { useNavigation } from "@react-navigation/native";
 
 function MapScreen() {
@@ -28,15 +33,11 @@ function MapScreen() {
   }, []);
 
   const handleSearch = () => {
-    convertSearchToCoords();
-  };
-
-  const getElevation = async (latitude, longitude) => {
-    return await fetchElevation(latitude, longitude);
+    convertSearchToCoords(searchText, setRegion);
   };
 
   const handleMapPress = async (event) => {
-    await addMarker(event);
+    await addMarker(event, markers, setMarkers);
   };
 
   const handleNext = async () => {
@@ -62,92 +63,6 @@ function MapScreen() {
       calculateAndSetPowerOutput();
     }
   }, [averageAltitude, averageSunExposure]);
-
-  const convertSearchToCoords = () => {
-    Geocoder.from(searchText)
-      .then((response) => {
-        const { lat, lng } = response.results[0].geometry.location;
-        const northeast = response.results[0].geometry.viewport.northeast;
-        const southwest = response.results[0].geometry.viewport.southwest;
-        const latitudeDelta = northeast.lat - southwest.lat;
-        const longitudeDelta = northeast.lng - southwest.lng;
-        setRegion({
-          latitude: lat,
-          longitude: lng,
-          latitudeDelta: latitudeDelta,
-          longitudeDelta: longitudeDelta,
-        });
-      })
-      .catch((error) => console.warn(error));
-  };
-
-  // fetch the elevation of a given latitude and longitude using the Google Elevation API
-  const fetchElevation = async (latitude, longitude) => {
-    const url = `https://maps.googleapis.com/maps/api/elevation/json?locations=${latitude},${longitude}&key=${"AIzaSyBIcIDCgseIHKADEEOzCrfV1ku927QlpV4"}`;
-    const response = await fetch(url);
-    const data = await response.json();
-    if (data.results.length > 0) {
-      return data.results[0].elevation;
-    }
-    return null;
-  };
-
-  // adding a marker to the map when the user presses on it, and calculate markers altitude and sun exposure
-  const addMarker = async (event) => {
-    const { coordinate } = event.nativeEvent;
-    const altitude = await getElevation(
-      // gets the altitude of the pressed location
-      coordinate.latitude,
-      coordinate.longitude
-    );
-    const avgSunExposure365 = calculateAvgSunExposure365(
-      coordinate.latitude,
-      coordinate.longitude
-    );
-
-    const newMarkers = [
-      ...markers,
-      {
-        latitude: coordinate.latitude,
-        longitude: coordinate.longitude,
-        altitude: altitude,
-        sunExposure: avgSunExposure365,
-      },
-    ];
-    setMarkers(newMarkers);
-  };
-
-  // calculate the sunrise and sunset times for the point using the suncalc library
-  const calculateAvgSunExposure365 = (latitude, longitude) => {
-    const sunTimes = suncalc.getTimes(new Date(), latitude, longitude);
-    const sunrise = sunTimes.sunrise.getTime();
-    const sunset = sunTimes.sunset.getTime();
-    const sunExposures = [];
-
-    for (let i = 0; i < 365; i++) {
-      // calculate the sun exposure for each day of the year
-      const newSunrise = new Date(sunrise + i * 24 * 60 * 60 * 1000); // add 24 hours to the sunrise time
-      const newSunset = new Date(sunset + i * 24 * 60 * 60 * 1000);
-      const newSunExposure = ((newSunset - newSunrise) / 86400000) * 86400; // in seconds
-      sunExposures.push(newSunExposure);
-    }
-
-    return sunExposures.reduce((acc, curr) => acc + curr, 0); // calculate the average sun exposure for the year
-  };
-
-  // calculate the average altitude and sun exposure of all markers
-  const calculateAndSetAltitudeAndSunExposure = () => {
-    const sumAltitude = markers.reduce((acc, curr) => acc + curr.altitude, 0);
-    const avgAltitude = sumAltitude / markers.length;
-    setAverageAltitude(avgAltitude.toFixed(2));
-
-    const sumSunExposure365 = markers.reduce(
-      (acc, curr) => acc + curr.sunExposure,
-      0
-    );
-    const avgSunExposure365 = sumSunExposure365 / markers.length;
-    setAverageSunExposure(avgSunExposure365.toFixed(2));
-  };
 
   const calculateAndSetPowerOutput = () => {
     const avgAltitude = parseFloat(averageAltitude);
@@ -188,7 +103,11 @@ function MapScreen() {
       area += triangleArea; // add to total area
     }
     setArea(area.toFixed(2));
-    calculateAndSetAltitudeAndSunExposure();
+    calculateAndSetAltitudeAndSunExposure(
+      markers,
+      setAverageAltitude,
+      setAverageSunExposure
+    );
   };
 
   return (
