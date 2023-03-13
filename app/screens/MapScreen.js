@@ -22,6 +22,7 @@ function MapScreen() {
   const [area, setArea] = useState(null);
   const [averageAltitude, setAverageAltitude] = useState(null);
   const [averageSunExposure, setAverageSunExposure] = useState(null);
+  const [energyOutput, setEnergyOutput] = useState(null);
 
   useEffect(() => {
     Geocoder.init("AIzaSyBIcIDCgseIHKADEEOzCrfV1ku927QlpV4");
@@ -112,13 +113,17 @@ function MapScreen() {
 
     const efficiency = 0.2; // assume a solar panel efficiency of 15%
     const powerOutput = solarIrradiance * area * efficiency;
-    const energyOutput = powerOutput * 365;
+    setEnergyOutput((powerOutput * 365).toFixed(2));
+  };
+
+  const handleNext = () => {
     navigation.navigate("Results", {
-      markers: markers,
-      area: area,
-      averageAltitude: averageAltitude,
-      averageSunExposure: averageSunExposure,
-      energyOutput: energyOutput.toFixed(2),
+      markers,
+      area,
+      averageAltitude,
+      averageSunExposure,
+      energyOutput,
+      searchText,
     });
   };
 
@@ -177,21 +182,7 @@ function MapScreen() {
         )}
       </MapView>
       <Button title="Calculate" onPress={handleCalculateArea} />
-      {area && (
-        <View style={{ alignSelf: "center" }}>
-          <Text>Area: {area} m²</Text>
-        </View>
-      )}
-      {averageAltitude !== null && (
-        <View style={{ alignSelf: "center" }}>
-          <Text>Average altitude: {averageAltitude} meters</Text>
-        </View>
-      )}
-      {averageSunExposure !== null && (
-        <View style={{ alignSelf: "center" }}>
-          <Text>Average sun exposure: {averageSunExposure} seconds</Text>
-        </View>
-      )}
+      <Button title="Next" onPress={handleNext} />
     </Screen>
   );
 }

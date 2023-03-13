@@ -25,6 +25,7 @@ const ResultsScreen = ({ route }) => {
         area,
         averageAltitude,
         averageSunExposure,
+        energyOutput,
       };
       const newProperties = [...properties, newProperty];
       const data = flatted.stringify(newProperties);
@@ -84,6 +85,7 @@ const ResultsScreen = ({ route }) => {
             area,
             averageAltitude,
             averageSunExposure,
+            energyOutput,
             properties
           );
         }}

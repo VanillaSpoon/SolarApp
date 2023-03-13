@@ -76,6 +76,7 @@ function ScannedScreen() {
                   averageAltitude: item.averageAltitude,
                   averageSunExposure: item.averageSunExposure,
                   propertyId: properties.indexOf(item),
+                  energyOutput: item.energyOutput,
                 })
               }
             />

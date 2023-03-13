@@ -8,7 +8,10 @@ import { useNavigation } from "@react-navigation/native";
 const PropertyScreen = ({ route }) => {
   const navigation = useNavigation();
 
-  const { markers, area, averageAltitude, averageSunExposure } = route.params;
+  const { markers, area, averageAltitude, averageSunExposure, energyOutput } =
+    route.params;
+  console.log("energyOutput:", energyOutput);
+  console.log(route.params);
 
   return (
     <Screen style={{ flex: 1, alignItems: "center" }}>
@@ -40,10 +43,24 @@ const PropertyScreen = ({ route }) => {
       ))}
       {area !== null && <Text>Area: {area} m²</Text>}
       {averageAltitude !== null && (
-        <Text>Average altitude: {averageAltitude} meters</Text>
+        <Text>
+          <Text style={{ fontWeight: "bold" }}>Average Altitude:</Text>{" "}
+          {averageAltitude} meters
+        </Text>
       )}
       {averageSunExposure !== null && (
-        <Text>Average sun exposure: {averageSunExposure} seconds</Text>
+        <Text style={{ marginBottom: 50 }}>
+          <Text style={{ fontWeight: "bold" }}>Average Sun Exposure:</Text>{" "}
+          {averageSunExposure} W/m²
+        </Text>
+      )}
+      {energyOutput !== null && (
+        <Text style={{ fontSize: 18 }}>
+          <Text style={{ fontWeight: "bold" }}>
+            Annual Energy Production Estimation:
+          </Text>{" "}
+          {energyOutput} kWh
+        </Text>
       )}
     </Screen>
   );
