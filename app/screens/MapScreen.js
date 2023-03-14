@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { View, TextInput, Button } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+
 import Screen from "../components/Screen";
+
+import { convertSearchToCoords } from "../calculations/convertSearchToCoOrds";
+import { addMarker } from "../calculations/addMarker";
+import { calculateArea } from "../calculations/calculateArea";
+import { calculateAndSetPowerOutput } from "../calculations/calculateAndSetPowerOutput";
+import { calculateAndSetAltitudeAndSunExposure } from "../calculations/calculateAndSetAltitudeAndSunExposure";
+
 import MapView, { PROVIDER_GOOGLE, Marker, Polygon } from "react-native-maps";
 import Geocoder from "react-native-geocoding";
-import haversine from "haversine";
-import suncalc from "suncalc";
-import { convertSearchToCoords } from "../calculations/convertSearchToCoOrds";
-import { fetchElevation } from "../calculations/fetchElevation";
-import { addMarker } from "../calculations/addMarker";
-import { calculateAvgSunExposure365 } from "../calculations/calculateAvgSunExposure365";
-import { calculateAndSetAltitudeAndSunExposure } from "../calculations/calculateAndSetAltitudeAndSunExposure";
-import { useNavigation } from "@react-navigation/native";
 
 function MapScreen() {
   const navigation = useNavigation();
@@ -52,7 +53,13 @@ function MapScreen() {
         return;
       }
 
-      calculateArea();
+      calculateArea(
+        markers,
+        setArea,
+        calculateAndSetAltitudeAndSunExposure,
+        setAverageAltitude,
+        setAverageSunExposure
+      );
 
       resolve();
     });
@@ -60,21 +67,14 @@ function MapScreen() {
 
   useEffect(() => {
     if (averageAltitude !== null && averageSunExposure !== null) {
-      calculateAndSetPowerOutput();
+      calculateAndSetPowerOutput(
+        averageAltitude,
+        averageSunExposure,
+        area,
+        setEnergyOutput
+      );
     }
   }, [averageAltitude, averageSunExposure]);
-
-  const calculateAndSetPowerOutput = () => {
-    const avgAltitude = parseFloat(averageAltitude);
-    const avgSunExposure365 = parseFloat(averageSunExposure);
-
-    const solarIrradiance =
-      (avgSunExposure365 / 365 / 86400) * (1 - avgAltitude / 1000);
-
-    const efficiency = 0.2;
-    const powerOutput = solarIrradiance * area * efficiency;
-    setEnergyOutput((powerOutput * 365).toFixed(2));
-  };
 
   const navigateToResults = () => {
     navigation.navigate("Results", {
@@ -85,29 +85,6 @@ function MapScreen() {
       energyOutput,
       searchText,
     });
-  };
-
-  const calculateArea = () => {
-    let area = 0;
-
-    // Loop through the markers and calculate the area of each triangle formed by three consecutive markers
-    for (let i = 0; i < markers.length - 2; i++) {
-      const p1 = markers[i];
-      const p2 = markers[i + 1];
-      const p3 = markers[i + 2];
-      const a = haversine(p1, p2, { unit: "meter" }); // Length of side a using haversine formula
-      const b = haversine(p2, p3, { unit: "meter" });
-      const c = haversine(p3, p1, { unit: "meter" });
-      const s = (a + b + c) / 2; // Semi-perimeter of the triangle
-      const triangleArea = Math.sqrt(s * (s - a) * (s - b) * (s - c)); // Area of the triangle using Heron's formula
-      area += triangleArea; // add to total area
-    }
-    setArea(area.toFixed(2));
-    calculateAndSetAltitudeAndSunExposure(
-      markers,
-      setAverageAltitude,
-      setAverageSunExposure
-    );
   };
 
   return (

@@ -1,4 +1,5 @@
 import suncalc from "suncalc";
+
 // calculate the sunrise and sunset times for the point using the suncalc library
 export const calculateAvgSunExposure365 = (latitude, longitude) => {
   const sunTimes = suncalc.getTimes(new Date(), latitude, longitude);
