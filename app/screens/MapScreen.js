@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, TextInput, Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 import Screen from "../components/Screen";
 
-import { convertSearchToCoords } from "../calculations/convertSearchToCoOrds";
+import { convertSearchToCoords } from "../calculations/convertSearchToCoords";
 import { addMarker } from "../calculations/addMarker";
 import { calculateArea } from "../calculations/calculateArea";
 import { calculateAndSetPowerOutput } from "../calculations/calculateAndSetPowerOutput";
@@ -12,9 +12,11 @@ import { calculateAndSetAltitudeAndSunExposure } from "../calculations/calculate
 
 import MapView, { PROVIDER_GOOGLE, Marker, Polygon } from "react-native-maps";
 import Geocoder from "react-native-geocoding";
+import { captureRef } from "react-native-view-shot";
 
 function MapScreen() {
   const navigation = useNavigation();
+  const mapRef = useRef(null);
 
   const [searchText, setSearchText] = useState("");
   const [region, setRegion] = useState({
@@ -43,7 +45,8 @@ function MapScreen() {
 
   const handleNext = async () => {
     await handleCalculations();
-    navigateToResults();
+    const mapScreenshot = await captureMapScreenshot();
+    navigateToResults(mapScreenshot);
   };
 
   const handleCalculations = () => {
@@ -65,6 +68,19 @@ function MapScreen() {
     });
   };
 
+  const captureMapScreenshot = async () => {
+    try {
+      const snapshot = await captureRef(mapRef, {
+        format: "jpg",
+        quality: 0.8,
+      });
+      return snapshot;
+    } catch (error) {
+      console.error("Error capturing map screenshot:", error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     if (averageAltitude !== null && averageSunExposure !== null) {
       calculateAndSetPowerOutput(
@@ -76,7 +92,7 @@ function MapScreen() {
     }
   }, [averageAltitude, averageSunExposure]);
 
-  const navigateToResults = () => {
+  const navigateToResults = (mapScreenshot) => {
     navigation.navigate("Results", {
       markers,
       area,
@@ -84,6 +100,7 @@ function MapScreen() {
       averageSunExposure,
       energyOutput,
       searchText,
+      mapScreenshot,
     });
   };
 
@@ -98,6 +115,7 @@ function MapScreen() {
         <Button title="Search" onPress={handleSearch} />
       </View>
       <MapView
+        ref={mapRef}
         provider={PROVIDER_GOOGLE}
         style={{ flex: 1 }}
         mapType="hybrid"

@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import colors from "../config/colors";
 
-function Tile({ title, address, image, onPress }) {
+function Tile({ title, energyOutput, image, onPress }) {
   return (
     <TouchableWithoutFeedback onPress={onPress}>
       <View style={styles.tile}>
@@ -19,8 +19,8 @@ function Tile({ title, address, image, onPress }) {
           <Text style={styles.title} numberOfLines={1}>
             {title}
           </Text>
-          <Text style={styles.address} numberOfLines={5}>
-            {address}
+          <Text style={styles.energyOutput} numberOfLines={5}>
+            {energyOutput}
           </Text>
         </View>
       </View>
@@ -47,8 +47,8 @@ const styles = StyleSheet.create({
     width: 150,
     height: 150,
   },
-  address: {
-    color: colors.secondary,
+  energyOutput: {
+    color: colors.primary,
     paddingTop: 5,
     fontWeight: "bold",
   },

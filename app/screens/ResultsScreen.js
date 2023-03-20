@@ -15,6 +15,7 @@ const ResultsScreen = ({ route }) => {
     averageSunExposure,
     energyOutput,
     searchText,
+    mapScreenshot,
   } = route.params;
 
   const saveInfo = async (
@@ -24,6 +25,7 @@ const ResultsScreen = ({ route }) => {
     averageSunExposure,
     energyOutput,
     searchText,
+    mapScreenshot,
     properties
   ) => {
     try {
@@ -34,6 +36,7 @@ const ResultsScreen = ({ route }) => {
         averageSunExposure,
         energyOutput,
         searchText,
+        mapScreenshot,
       };
       const newProperties = [...properties, newProperty];
       const data = flatted.stringify(newProperties);
@@ -120,6 +123,7 @@ const ResultsScreen = ({ route }) => {
             averageSunExposure,
             energyOutput,
             searchText,
+            mapScreenshot,
             properties
           );
         }}

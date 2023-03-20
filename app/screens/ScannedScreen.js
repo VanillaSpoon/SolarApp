@@ -4,7 +4,7 @@ import { FlatList, StyleSheet, Button, Alert, Image } from "react-native";
 import Tile from "../components/Tile";
 import colors from "../config/colors";
 import Screen from "../components/Screen";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import flatted from "flatted";
 
@@ -12,20 +12,22 @@ function ScannedScreen() {
   const navigation = useNavigation();
   const [properties, setProperties] = useState([]);
 
-  useEffect(() => {
-    const loadProperties = async () => {
-      try {
-        const data = await AsyncStorage.getItem("properties");
-        if (data) {
-          const parsedData = flatted.parse(data);
-          setProperties(parsedData);
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadProperties = async () => {
+        try {
+          const data = await AsyncStorage.getItem("properties");
+          if (data) {
+            const parsedData = flatted.parse(data);
+            setProperties(parsedData);
+          }
+        } catch (error) {
+          console.error(error);
         }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    loadProperties();
-  }, []);
+      };
+      loadProperties();
+    }, [])
+  );
 
   const handleNavigation = () => {
     navigation.navigate("Solar");
@@ -67,8 +69,9 @@ function ScannedScreen() {
           keyExtractor={(property, index) => index.toString()}
           renderItem={({ item }) => (
             <Tile
-              title={`Property ${properties.indexOf(item) + 1}`}
-              image={require("../assets/images/house.jpeg")}
+              title={item.searchText}
+              energyOutput={`${item.energyOutput} kWh/year`}
+              image={{ uri: item.mapScreenshot }}
               onPress={() =>
                 navigation.navigate("Property", {
                   markers: item.markers,
