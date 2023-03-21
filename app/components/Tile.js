@@ -16,7 +16,7 @@ function Tile({ title, energyOutput, image, onPress }) {
           <Image style={styles.image} source={image} />
         </View>
         <View style={styles.detailsContainer}>
-          <Text style={styles.title} numberOfLines={1}>
+          <Text style={styles.title} numberOfLines={3}>
             {title}
           </Text>
           <Text style={styles.energyOutput} numberOfLines={5}>
@@ -33,9 +33,14 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     backgroundColor: colors.white,
     marginBottom: 25,
-    alignContent: "flex-end",
-    overflow: "hidden",
+    padding: 10,
     flexDirection: "row",
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   detailsContainer: {
     paddingBottom: 100,
@@ -46,6 +51,7 @@ const styles = StyleSheet.create({
   image: {
     width: 150,
     height: 150,
+    borderRadius: 10,
   },
   energyOutput: {
     color: colors.primary,

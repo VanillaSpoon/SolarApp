@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FlatList, StyleSheet, Button, Alert, Image } from "react-native";
 
 import Tile from "../components/Tile";
