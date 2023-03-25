@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import { View, Text, Button, StyleSheet, ScrollView } from "react-native";
 import Screen from "../components/Screen";
 import colors from "../config/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -50,53 +50,55 @@ const ResultsScreen = ({ route }) => {
 
   return (
     <Screen style={styles.container}>
-      <View style={styles.infoSection}>
-        <Text style={styles.label}>Address: </Text>
-        <Text>{searchText}</Text>
-        <Text style={styles.label}>Average Altitude: </Text>
-        <Text>{averageAltitude} meters</Text>
-        <Text style={styles.label}>Average Sun Exposure: </Text>
-        <Text>{averageSunExposure} W/m²</Text>
-      </View>
-
-      <View style={styles.markerSection}>
-        <View style={styles.row}>
-          <Text style={[styles.label, styles.flex1]}>Marker</Text>
-          <Text style={[styles.label, styles.flex1]}>Longitude</Text>
-          <Text style={[styles.label, styles.flex1]}>Latitude</Text>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.infoSection}>
+          <Text style={styles.label}>Address: </Text>
+          <Text>{searchText}</Text>
+          <Text style={styles.label}>Average Altitude: </Text>
+          <Text>{averageAltitude} meters</Text>
+          <Text style={styles.label}>Average Sun Exposure: </Text>
+          <Text>{averageSunExposure} W/m²</Text>
         </View>
-        {markers.map((marker, index) => (
-          <View key={index} style={styles.row}>
-            <Text style={styles.flex1}>{`Marker ${index + 1}`}</Text>
-            <Text style={styles.flex1}>{marker.longitude.toFixed(6)}</Text>
-            <Text style={styles.flex1}>{marker.latitude.toFixed(6)}</Text>
-          </View>
-        ))}
-      </View>
 
-      <View style={styles.estimationSection}>
-        <Text style={styles.estimationTitle}>
-          Annual Energy Production Estimation
-        </Text>
-        <Text style={styles.estimationValue}>{energyOutput} kWh</Text>
-      </View>
-      <Button
-        title="Save"
-        onPress={async () => {
-          const data = await AsyncStorage.getItem("properties");
-          const properties = data ? flatted.parse(data) : [];
-          saveInfo(
-            markers,
-            area,
-            averageAltitude,
-            averageSunExposure,
-            energyOutput,
-            searchText,
-            mapScreenshot,
-            properties
-          );
-        }}
-      />
+        <View style={styles.markerSection}>
+          <View style={styles.row}>
+            <Text style={[styles.label, styles.flex1]}>Marker</Text>
+            <Text style={[styles.label, styles.flex1]}>Longitude</Text>
+            <Text style={[styles.label, styles.flex1]}>Latitude</Text>
+          </View>
+          {markers.map((marker, index) => (
+            <View key={index} style={styles.row}>
+              <Text style={styles.flex1}>{`Marker ${index + 1}`}</Text>
+              <Text style={styles.flex1}>{marker.longitude.toFixed(6)}</Text>
+              <Text style={styles.flex1}>{marker.latitude.toFixed(6)}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.estimationSection}>
+          <Text style={styles.estimationTitle}>
+            Annual Energy Production Estimation
+          </Text>
+          <Text style={styles.estimationValue}>{energyOutput} kWh</Text>
+        </View>
+        <Button
+          title="Save"
+          onPress={async () => {
+            const data = await AsyncStorage.getItem("properties");
+            const properties = data ? flatted.parse(data) : [];
+            saveInfo(
+              markers,
+              area,
+              averageAltitude,
+              averageSunExposure,
+              energyOutput,
+              searchText,
+              mapScreenshot,
+              properties
+            );
+          }}
+        />
+      </ScrollView>
     </Screen>
   );
 };

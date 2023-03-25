@@ -1,11 +1,6 @@
-import React, { Component } from "react";
-import Screen from "./app/components/Screen";
-import WelcomeScreen from "./app/screens/WelcomeScreen";
-import RegisterScreen from "./app/screens/RegisterScreen";
-import LoginScreen from "./app/screens/LoginScreen";
+import React from "react";
 import ScannedScreen from "./app/screens/ScannedScreen";
 import MapScreen from "./app/screens/MapScreen";
-import SidebarScreen from "./app/screens/SidebarScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import ResultsScreen from "./app/screens/ResultsScreen";
