@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { FlatList, StyleSheet, Button, Alert, Image } from "react-native";
+import {
+  FlatList,
+  StyleSheet,
+  Button,
+  Alert,
+  Image,
+  Keyboard,
+} from "react-native";
 
 import Tile from "../components/Tile";
 import colors from "../config/colors";
@@ -31,6 +38,7 @@ function ScannedScreen() {
 
   const handleNavigation = () => {
     navigation.navigate("Solar");
+    Keyboard.dismiss();
   };
 
   const handleRemoveAllProperties = async () => {
