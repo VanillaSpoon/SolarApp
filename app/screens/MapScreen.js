@@ -14,6 +14,8 @@ import MapView, { PROVIDER_GOOGLE, Marker, Polygon } from "react-native-maps";
 import Geocoder from "react-native-geocoding";
 import { captureRef } from "react-native-view-shot";
 
+import { API_KEY } from "../calculations/API_KEY";
+
 function MapScreen() {
   const navigation = useNavigation();
   const mapRef = useRef(null);
@@ -32,7 +34,7 @@ function MapScreen() {
   const [energyOutput, setEnergyOutput] = useState(null);
 
   useEffect(() => {
-    Geocoder.init("AIzaSyBIcIDCgseIHKADEEOzCrfV1ku927QlpV4");
+    Geocoder.init(API_KEY);
   }, []);
 
   const handleSearch = () => {
