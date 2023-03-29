@@ -96,7 +96,7 @@ function ScannedScreen() {
         />
       ) : (
         <Image
-          style={{ width: "100%", height: "50%" }}
+          style={{ width: "100%", height: "60%" }}
           source={require("../assets/images/houseNB.png")}
         />
       )}
